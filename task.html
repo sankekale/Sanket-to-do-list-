@@ -1,0 +1,62 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>to do list</title>
+<link rel="stylesheet" href="task.css">
+</head>
+<body>
+<div id="app">
+  <h2>To-Do List</h2>
+  <div class="row">
+    <input id="taskInput" placeholder="New task">
+    <button id="addBtn">Add</button>
+  </div>
+  <div class="filters">
+    <select id="filter">
+      <option>All</option><option>Completed</option><option>Pending</option>
+    </select>
+    <button id="clearAll">Clear All</button>
+  </div>
+  <ul id="list"></ul>
+</div>
+
+<script>
+const input=document.getElementById('taskInput'),
+      add=document.getElementById('addBtn'),
+      list=document.getElementById('list'),
+      filter=document.getElementById('filter'),
+      clearAll=document.getElementById('clearAll');
+
+let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+render();
+
+function save(){localStorage.setItem('tasks',JSON.stringify(tasks));}
+
+function render(){
+  list.innerHTML='';
+  tasks.forEach((t,i)=>{
+    if(filter.value==='Completed'&&!t.done) return;
+    if(filter.value==='Pending'&&t.done) return;
+    const li=document.createElement('li');
+    li.className=t.done?'done':'';
+    li.innerHTML=`<span>${t.text}</span><button class="del">Done</button>`;
+    li.querySelector('span').onclick=()=>{t.done=!t.done;save();render();}
+    li.querySelector('.del').onclick=()=>{tasks.splice(i,1);save();render();}
+    list.appendChild(li);
+  });
+}
+
+function addTask(){
+  const text=input.value.trim();
+  if(!text) return;
+  tasks.push({text,done:false});
+  input.value='';save();render();
+}
+
+add.onclick=addTask;
+input.onkeypress=e=>{if(e.key==='Enter')addTask();};
+filter.onchange=render;
+clearAll.onclick=()=>{tasks=[];save();render();}
+</script>
+</body>
+</html>
